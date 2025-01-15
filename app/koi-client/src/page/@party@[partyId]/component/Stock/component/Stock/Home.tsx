@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useAtomValue } from 'jotai';
 import { commaizeNumber, objectEntries } from '@toss/utils';
 import { getDateDistance } from '@toss/date';
@@ -10,6 +10,31 @@ import { Query } from '../../../../../../hook';
 import Box from '../../../../../../component-presentation/Box';
 import prependZero from '../../../../../../service/prependZero';
 import { colorDown, colorUp } from '../../../../../../config/color';
+
+// constants
+const DEFAULT_FLUCTUATION_INTERVAL = 5;
+const REMAINING_STOCK_THRESHOLD = 0.9;
+const STOCK_PER_USER = 3;
+const TOTAL_ROUND_COUNT = 10;
+
+// utils
+const getCurrentRoundIndex = (startTime?: string, interval: number = DEFAULT_FLUCTUATION_INTERVAL) => {
+  if (startTime === undefined) return -1;
+
+  const distance = getDateDistance(dayjs(startTime).toDate(), new Date());
+  return Math.floor(distance.minutes / interval);
+};
+
+const getLowSalesCompanies = (
+  remainingStocks: Record<string, number>,
+  userCount: number,
+  stockPerUser = STOCK_PER_USER,
+) => {
+  const maxQuantity = (userCount ?? 1) * stockPerUser;
+  return objectEntries(remainingStocks)
+    .filter(([, remaining]) => remaining > maxQuantity * REMAINING_STOCK_THRESHOLD)
+    .map(([company]) => company);
+};
 
 interface Props {
   stockId: string;
@@ -25,9 +50,19 @@ const Home = ({ stockId }: Props) => {
   const { user } = Query.Stock.useUser({ stockId, userId });
   const { allSellPrice, allUserSellPriceDesc } = Query.Stock.useAllSellPrice({ stockId, userId });
 
+  const roundIndex = getCurrentRoundIndex(stock?.startedTime, stock?.fluctuationsInterval);
+
+  // 0-9 랜덤 수를 어떻게 사용하는 게 좋을까? -> 새로고침 했을 때, 변하지 않아야 해
+  const randomNumber = useMemo(
+    () => (roundIndex >= 0 && roundIndex < TOTAL_ROUND_COUNT - 1 ? Math.floor(Math.random() * 10) : -1),
+    [roundIndex],
+  );
+
   if (!user || !stock) {
     return <div>불러오는 중.</div>;
   }
+
+  console.log({ randomNumber });
 
   const getProfitRatio = (v: number) => ((v / 1000000) * 100 - 100).toFixed(2);
 
@@ -47,6 +82,9 @@ const Home = ({ stockId }: Props) => {
       };
     })
     .sort((a, b) => b.profit - a.profit);
+
+  console.log({ stock });
+  console.log({ profiles });
 
   const [partnerIds, myInfos] = objectEntries(stock.companies).reduce(
     (reducer, [company, companyInfos]) => {
@@ -70,6 +108,7 @@ const Home = ({ stockId }: Props) => {
     },
     [[], []] as [Array<string>, Array<{ company: string; timeIdx: number; price: number }>],
   );
+
   const partnerNicknames = profiles?.data
     ?.map((v) => {
       if (partnerIds.some((partnerId) => partnerId === v.id)) {
@@ -79,6 +118,21 @@ const Home = ({ stockId }: Props) => {
       return undefined;
     })
     .filter((v) => !!v);
+
+  // const companyCount = objectEntries(stock.companies).length ?? 10;
+
+  const lowSalesCompanies = getLowSalesCompanies(stock.remainingStocks, profiles?.data?.length ?? 1);
+
+  const randomCompanyIndex = randomNumber % lowSalesCompanies.length;
+  const randomLowSalesCompany = lowSalesCompanies[randomCompanyIndex];
+
+  const priceVariation = Math.abs(
+    (stock.companies?.[randomLowSalesCompany]?.[roundIndex + 1]?.가격 ?? 0) -
+      (stock.companies?.[randomLowSalesCompany]?.[roundIndex]?.가격 ?? 0),
+  );
+
+  console.log({ lowSalesCompanies });
+  console.log({ priceVariation });
 
   return (
     <>
@@ -147,6 +201,25 @@ const Home = ({ stockId }: Props) => {
         ))}
       </ul>
       <br />
+      {randomLowSalesCompany && (
+        <>
+          <H3>변동 예정 정보</H3>
+          <Box
+            key={`${randomLowSalesCompany}_${roundIndex + 1}`}
+            title={`${randomLowSalesCompany}`}
+            value={`?? ${commaizeNumber(Math.abs(priceVariation))}`}
+            rightComponent={
+              <div
+                css={css`
+                  font-size: 18px;
+                `}
+              >
+                {prependZero((roundIndex + 1) * stock.fluctuationsInterval, 2)}:00
+              </div>
+            }
+          />
+        </>
+      )}
       <br />
       <br />
     </>
