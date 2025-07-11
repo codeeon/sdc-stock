@@ -83,18 +83,28 @@ export class StockProcessor {
         (stockStorage.stockAveragePrice * stockStorage.stockCountCurrent + companyPrice * amount) /
         (stockStorage.stockCountCurrent + amount);
 
+      const stockCountHistory = Object.entries(stockStorage.stockCountHistory).reduce((acc, [key, value], index) => {
+        if (index < idx) {
+          acc[key] = value;
+          return acc;
+        }
+        acc[key] = value + amount;
+        return acc;
+      }, {} as Record<string, number>);
+
       // 주식 및 보유량 업데이트
       const updatedStockStorage = {
         ...stockStorage,
         stockAveragePrice,
         stockCountCurrent: companyCount + amount,
-        stockCountHistory: { ...stockStorage.stockCountHistory },
+        // stockCountHistory: { ...stockStorage.stockCountHistory },
+        stockCountHistory,
       };
 
       // 주식 보유량 로그 업데이트
-      for (let i = idx; i <= updatedStockStorage.stockCountHistory.length; i++) {
-        updatedStockStorage.stockCountHistory[i] = companyCount + amount;
-      }
+      // for (let i = idx; i < Object.keys(updatedStockStorage.stockCountHistory).length; i++) {
+      //   updatedStockStorage.stockCountHistory[i] = companyCount + amount;
+      // }
 
       // 사용자 정보 업데이트
       const updatedStockStorages = user.stockStorages.map((storage) =>
@@ -230,18 +240,28 @@ export class StockProcessor {
       // 평균 단가 업데이트 - 판매 후 보유 수량이 0이 되면 0으로 초기화, 보유 시 평균 단가 유지
       const stockAveragePrice = companyCount <= amount ? 0 : stockStorage.stockAveragePrice;
 
+      const stockCountHistory = Object.entries(stockStorage.stockCountHistory).reduce((acc, [key, value], index) => {
+        if (index < idx) {
+          acc[key] = value;
+          return acc;
+        }
+        acc[key] = value + amount;
+        return acc;
+      }, {} as Record<string, number>);
+
       // 주식 및 보유량 업데이트
       const updatedStockStorage = {
         ...stockStorage,
         stockAveragePrice,
         stockCountCurrent: companyCount - amount,
-        stockCountHistory: { ...stockStorage.stockCountHistory },
+        // stockCountHistory: { ...stockStorage.stockCountHistory },
+        stockCountHistory,
       };
 
       // 주식 보유량 로그 업데이트
-      for (let i = idx; i <= updatedStockStorage.stockCountHistory.length; i++) {
-        updatedStockStorage.stockCountHistory[i] = companyCount - amount;
-      }
+      // for (let i = idx; i < Object.keys(updatedStockStorage.stockCountHistory).length; i++) {
+      //   updatedStockStorage.stockCountHistory[i] = companyCount - amount;
+      // }
 
       // 사용자 정보 업데이트
       const updatedStockStorages = user.stockStorages.map((storage) =>

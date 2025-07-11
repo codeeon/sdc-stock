@@ -282,7 +282,6 @@ export class UserRepository {
           stockCountHistory: {
             '0': 0,
             '1': 0,
-            '10': 0,
             '2': 0,
             '3': 0,
             '4': 0,

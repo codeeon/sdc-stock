@@ -61,7 +61,7 @@ export class StockUser implements StockUserSchema {
         companyName: company,
         stockAveragePrice: 0,
         stockCountCurrent: 0,
-        stockCountHistory: { '0': 0, '1': 0, '10': 0, '2': 0, '3': 0, '4': 0, '5': 0, '6': 0, '7': 0, '8': 0, '9': 0 },
+        stockCountHistory: { '0': 0, '1': 0, '2': 0, '3': 0, '4': 0, '5': 0, '6': 0, '7': 0, '8': 0, '9': 0 },
       } as StockStorageSchema;
     });
 

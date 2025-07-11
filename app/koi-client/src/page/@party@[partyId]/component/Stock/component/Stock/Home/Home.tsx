@@ -56,8 +56,17 @@ const Home = ({ stockId, messageApi }: Props) => {
           <StartLoan stockId={stockId} money={user.money} loanCount={user.loanCount} allSellPrice={myAllSellPrice} />
         </StickyBottom>
       )}
+      <Portfolio stockId={stockId} userId={userId} />
     </>
   );
 };
 
 export default Home;
+
+export const Portfolio = ({ stockId, userId }: { stockId: string; userId: string }) => {
+  const portfolios = Query.Stock.usePortfolios({ stockId, userId });
+
+  console.log({ portfolios });
+
+  return <div>냠</div>;
+};
