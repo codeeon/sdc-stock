@@ -1,5 +1,4 @@
 import dayjs from 'dayjs';
-import { StockConfig } from 'shared~config';
 import {
   StockStorageSchema,
   StockUserForm,
@@ -17,7 +16,7 @@ export class StockUserStorage implements StockStorageSchema {
 
   stockCountCurrent: number;
 
-  stockCountHistory: number[];
+  stockCountHistory: Record<string, number>;
 }
 
 export class StockUserInfo implements StockUserInfoSchema {
@@ -62,7 +61,7 @@ export class StockUser implements StockUserSchema {
         companyName: company,
         stockAveragePrice: 0,
         stockCountCurrent: 0,
-        stockCountHistory: new Array(StockConfig.MAX_STOCK_IDX + 1).fill(0),
+        stockCountHistory: { '0': 0, '1': 0, '10': 0, '2': 0, '3': 0, '4': 0, '5': 0, '6': 0, '7': 0, '8': 0, '9': 0 },
       } as StockStorageSchema;
     });
 

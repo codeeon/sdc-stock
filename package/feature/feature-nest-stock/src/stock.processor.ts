@@ -88,9 +88,14 @@ export class StockProcessor {
         ...stockStorage,
         stockAveragePrice,
         stockCountCurrent: companyCount + amount,
-        stockCountHistory: [...stockStorage.stockCountHistory],
+        stockCountHistory: { ...stockStorage.stockCountHistory },
       };
-      updatedStockStorage.stockCountHistory[idx] += amount;
+
+      // 주식 보유량 로그 업데이트
+      for (let i = idx; i <= updatedStockStorage.stockCountHistory.length; i++) {
+        updatedStockStorage.stockCountHistory[i] = companyCount + amount;
+      }
+
       // 사용자 정보 업데이트
       const updatedStockStorages = user.stockStorages.map((storage) =>
         storage.companyName === company ? updatedStockStorage : storage,
@@ -230,9 +235,13 @@ export class StockProcessor {
         ...stockStorage,
         stockAveragePrice,
         stockCountCurrent: companyCount - amount,
-        stockCountHistory: [...stockStorage.stockCountHistory],
+        stockCountHistory: { ...stockStorage.stockCountHistory },
       };
-      updatedStockStorage.stockCountHistory[idx] -= amount;
+
+      // 주식 보유량 로그 업데이트
+      for (let i = idx; i <= updatedStockStorage.stockCountHistory.length; i++) {
+        updatedStockStorage.stockCountHistory[i] = companyCount - amount;
+      }
 
       // 사용자 정보 업데이트
       const updatedStockStorages = user.stockStorages.map((storage) =>

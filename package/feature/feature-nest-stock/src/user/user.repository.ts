@@ -8,7 +8,6 @@ import {
   QueryCommand,
   ScanCommand,
 } from '@aws-sdk/lib-dynamodb';
-import { StockConfig } from 'shared~config';
 import { Request, StockSchema, StockStorageSchema, StockUserSchema } from 'shared~type-stock';
 import dayjs from 'dayjs';
 import { StockUser } from './user.schema';
@@ -280,7 +279,19 @@ export class UserRepository {
           companyName: company,
           stockAveragePrice: 0,
           stockCountCurrent: 0,
-          stockCountHistory: new Array(StockConfig.MAX_STOCK_IDX + 1).fill(0),
+          stockCountHistory: {
+            '0': 0,
+            '1': 0,
+            '10': 0,
+            '2': 0,
+            '3': 0,
+            '4': 0,
+            '5': 0,
+            '6': 0,
+            '7': 0,
+            '8': 0,
+            '9': 0,
+          },
         } as StockStorageSchema;
       });
 

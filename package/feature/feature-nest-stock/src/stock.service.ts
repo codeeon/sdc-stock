@@ -363,7 +363,7 @@ export class StockService {
           remainingStocks[stockStorage.companyName] = companyRemainingStock + stockStorage.stockCountCurrent;
 
           // 주식 보유량 이력 업데이트
-          const updatedStockCountHistory = [...stockStorage.stockCountHistory];
+          const updatedStockCountHistory = { ...stockStorage.stockCountHistory };
           updatedStockCountHistory[idx] -= stockStorage.stockCountCurrent;
 
           return {
