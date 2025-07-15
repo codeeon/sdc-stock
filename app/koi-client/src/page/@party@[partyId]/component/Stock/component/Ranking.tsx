@@ -12,7 +12,7 @@ import { css } from '@linaria/core';
 import { UserStore } from '../../../../../store';
 import { Query } from '../../../../../hook';
 import { LOCAL_STORAGE_KEY } from '../../../../../config/localStorage';
-import { calculateAllPortfolios } from '../../../../../utils/stock';
+import { calculateAllPortfolios, formatPercentage } from '../../../../../utils/stock';
 import DoughnutChart from '../../../../../component-presentation/DoughnutChart';
 
 interface RankingProps {
@@ -66,7 +66,7 @@ function Ranking({ stockId }: RankingProps) {
   const getRoundAvg = stock.round === 0 ? getRound0Avg : getRound12Avg;
   const roundAvg = getRoundAvg(userId);
   const fluctuation = roundAvg - stock.initialMoney;
-  const percentage = Math.round((fluctuation / stock.initialMoney) * 100 * 10) / 10;
+  const percentage = formatPercentage(fluctuation / stock.initialMoney);
 
   if (!users) {
     return <></>;
@@ -129,7 +129,7 @@ function Ranking({ stockId }: RankingProps) {
   const portfolioList = Object.entries(portfolios).map(([timeIdx, companyPortfolio]) => {
     const totalStockAmount = Object.values(companyPortfolio).reduce((acc, curr) => acc + curr.stockPrice, 0);
     const portfolioData = Object.entries(companyPortfolio).map(([company, { stockPrice }]) => {
-      const stockPriceRatio = Math.round((stockPrice / totalStockAmount) * 100 * 10) / 10;
+      const stockPriceRatio = formatPercentage(stockPrice / totalStockAmount);
       return {
         label: `${company} (${stockPriceRatio}%)`,
         value: stockPrice,
@@ -238,7 +238,7 @@ function Ranking({ stockId }: RankingProps) {
           {sortedUser.map((user, index) => {
             const userAvg = getRoundAvg(user.userId);
             const userFluctuation = userAvg - stock.initialMoney;
-            const userPercentage = Math.round((userFluctuation / stock.initialMoney) * 100 * 10) / 10;
+            const userPercentage = formatPercentage(userFluctuation / stock.initialMoney);
             const animalResult = getAnimalByPercentage(userPercentage);
 
             return (
