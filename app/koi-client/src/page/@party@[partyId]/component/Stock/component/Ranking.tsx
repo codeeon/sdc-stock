@@ -126,6 +126,17 @@ function Ranking({ stockId }: RankingProps) {
     companies: stock.companies,
     stockStorages: user?.stockStorages ?? [],
   });
+  const portfolioList = Object.entries(portfolios).map(([timeIdx, companyPortfolio]) => {
+    const totalStockAmount = Object.values(companyPortfolio).reduce((acc, curr) => acc + curr.stockPrice, 0);
+    const portfolioData = Object.entries(companyPortfolio).map(([company, { stockPrice }]) => {
+      const stockPriceRatio = Math.round((stockPrice / totalStockAmount) * 100 * 10) / 10;
+      return {
+        label: `${company} (${stockPriceRatio}%)`,
+        value: stockPrice,
+      };
+    });
+    return { portfolioData, timeIdx, totalStockAmount };
+  });
 
   const handleDownload = async () => {
     if (!captureAreaRef.current) return;
@@ -255,14 +266,7 @@ function Ranking({ stockId }: RankingProps) {
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '40px', width: '100%' }}>
         {stock.gameMode === 'realism' &&
-          Object.entries(portfolios).map(([timeIdx, companyPortfolio]) => {
-            const portfolioData = Object.entries(companyPortfolio).map(([company, { stockPrice, profitRate }]) => {
-              return {
-                label: `${company} (${profitRate}%)`,
-                value: stockPrice,
-              };
-            });
-
+          portfolioList.map(({ portfolioData, timeIdx }) => {
             return (
               <div key={timeIdx}>
                 <h2 style={{ paddingLeft: '16px' }}>{Number(timeIdx) + 1}년차 포트폴리오</h2>
